@@ -1,24 +1,39 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {Switch, Route, Redirect, useHistory } from 'react-router-dom'
+import {DashboardPage} from './pages/Dashboard';
+import {Sidebar} from './components/Sidebar';
+import {Menu} from './components/Menu';
+
+import {guilds as mockGuilds} from "./utils/mocks";
+import { Guild } from './utils/types';
+import { GuildContextProvider } from './utils/contexts/GuildContext';
+import { GuildStoreContextProvider } from './utils/contexts/GuildStoreContext';
 
 function App() {
+  const [guild, setGuild] = React.useState<Guild | undefined>();
+  const [guilds, setGuilds] = React.useState<Guild[]>([]);
+  const history = useHistory();
+
+  React.useEffect(() => {
+    console.log("Setting Guilds");
+    setGuilds(mockGuilds);
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <GuildContextProvider value={{guild, setGuild}}>
+        <GuildStoreContextProvider value={{guilds, setGuilds}}>
+          <Sidebar guilds={guilds} history={history} />
+            <Menu history={history} />
+            <Switch>
+              <Redirect path='/' exact={true} to='/dashboard' />;
+              <Route path='/dashboard' exact={true} component={DashboardPage} />
+              <Route path='/dashboard/:guildId' exact={true} component={DashboardPage} />
+              <Route path='/dashboard/:guildId/general/muted' exact={true} component={DashboardPage} />
+    
+            </Switch>
+        </GuildStoreContextProvider>
+      </GuildContextProvider>
     </div>
   );
 }
